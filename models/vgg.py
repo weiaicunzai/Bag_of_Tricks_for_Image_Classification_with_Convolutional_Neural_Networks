@@ -23,7 +23,7 @@ class BasicConv(nn.Module):
 
 class VGG(nn.Module):
 
-    def __init__(self, blocks, num_class=120):
+    def __init__(self, blocks, num_class=200):
         super().__init__()
         self.input_channels = 3
         self.conv1 = self._make_layers(64, blocks[0])

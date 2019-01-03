@@ -1,4 +1,4 @@
-# Dog Breed Identification
+# Fine-Graind image classification
 
 
-Kaggle Dog Breed Identification
+Bag of Tricks for Image Classification with Convolutional Neural Networks

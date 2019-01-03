@@ -6,8 +6,8 @@ import cv2
 import torch
 import glob
 
-from PIL import Image
-from transforms import transforms
+#from PIL import Image
+import transforms.transforms as transforms
 
 
 path = '/Users/didi/Downloads/train/2d281959a02178bbcdeea424c8757b1d.jpg'
@@ -30,7 +30,7 @@ print('fff')
 data_b = np.hstack(data_b)
 data_r = np.hstack(data_r)
 data_g = np.hstack(data_g)
-print('fff')
+print('fff1s')
 #print('b')
 #data_g = np.hstack([cv2.imread(i)[:, :, 1].flatten() for i in glob.iglob('/Users/didi/Downloads/train/*.jpg')])
 #print('g')
