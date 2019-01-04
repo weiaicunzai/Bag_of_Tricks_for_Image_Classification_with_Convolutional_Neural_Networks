@@ -7,7 +7,32 @@ import cv2
 import numpy as np
 
 import torch
-from torchvision.transforms import Compose
+
+class Compose:
+    """Composes several transforms together.
+
+    Args:
+        transforms(list of 'Transform' object): list of transforms to compose
+
+    """    
+
+    def __init__(self, transforms):
+        self.transforms = transforms
+    
+    def __call__(self, img):
+
+        for trans in self.transforms:
+            img = trans(img)
+        
+        return img
+    
+    def __repr__(self):
+        format_string = self.__class__.__name__ + '('
+        for t in self.transforms:
+            format_string += '\n'
+            format_string += '    {0}'.format(t)
+        format_string += '\n)'
+        return format_string
 
 
 class ToFloat:

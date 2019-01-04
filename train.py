@@ -1,16 +1,20 @@
 
 
 import argparse
+import glob
+import os
 
-import numpy as np
 import cv2
 import torch
-import glob
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
 
 #from PIL import Image
-import transforms.transforms as transforms
-from utils import get_network, get_train_dataloader, get_test_dataloader
+import transforms 
+from tensorboardX import SummaryWriter
 from conf import settings
+from utils import *
 
 path = '/Users/didi/Downloads/train/2d281959a02178bbcdeea424c8757b1d.jpg'
 
@@ -21,16 +25,26 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-net', type=str, required=True, help='net type')
-    parser.add_argument('-gpu', type=bool, default=True, help='user gpu or not')
     parser.add_argument('-w', type=int, default=2, help='number of workers for dataloader')
     parser.add_argument('-b', type=int, default=12, help='batch size for dataloader')
-    
+    parser.add_argument('-lr', type=int, default=0.1, help='initial learning rate')
+    parser.add_argument('-e', type=int, default=120, help='training epoches')
     args = parser.parse_args()
 
-    net = get_network(args)
+    checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, settings.TIME_NOW)
+    if not os.path.exists(checkpoint_path):
+        os.makedirs(checkpoint_path)
+    checkpoint_path = os.path.join(checkpoint_path, '{net}-{epoch}-{type}.pth')
 
+    #tensorboard log directory
+    log_path = os.path.join(settings.LOG_DIR, args.net, settings.TIME_NOW)
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
+    writer = SummaryWriter(log_dir=log_path)
+
+    #get dataloader
     train_transforms = transforms.Compose([
-        transforms.RandomResizedCrop(224),
+        transforms.RandomResizedCrop(settings.IMAGE_SIZE),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(),
         transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD),
@@ -57,7 +71,58 @@ if __name__ == '__main__':
         args.w
     )
 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+    net = get_network(args)
+    net.to(device)
 
+    loss_function = nn.CrossEntropyLoss() 
+    optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4, nesterov=True)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
+
+    #visualize the network
+    visualize_network(writer, net)
+
+    best_acc = 0.0
+    for epoch in range(1, args.e):
+        scheduler.step()
+
+        #training procedure
+        net.train()
+        for batch_index, (images, labels) in enumerate(train_dataloader):
+
+            images = images.to(device)
+            labels = labels.to(device)
+
+            optimizer.zero_grad()
+            predicts = net(images)
+            loss = loss_function(predicts, labels)
+            loss.backward()
+            optimizer.step()
+
+            n_iter = (epoch - 1) * len(train_dataloader) + batch_index + 1
+            print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tLoss: {:0.4f}\t'.format(
+                loss.item(),
+                epoch=epoch,
+                trained_samples=batch_index * len(images),
+                total_samples=len(train_dataloader.dataset)
+            ))
+
+            #visualization
+            visualize_lastlayer(writer, net, n_iter)
+            visualize_train_loss(writer, loss.item(), n_iter)
+
+        visualize_param_hist(writer, net, epoch) 
+        #net.eval()
+
+
+
+
+
+
+    
+
+
+    
 
     #cv2.imshow('origin', image)
     #trans = transforms.CenterCrop()

@@ -1,6 +1,12 @@
 
-from torch.utils.data import DataLoader
 
+import os
+
+import torch
+
+from torch.utils.data import DataLoader
+from torch.autograd import Variable
+from conf.settings import settings
 from dataset.dataset import CUB_200_2011_Train, CUB_200_2011_Test
 
 def get_network(args):
@@ -21,9 +27,6 @@ def get_network(args):
         from models.vgg import vgg19
         net = vgg19()
 
-    if args.gpu:
-        net = net.cuda()
-        
     return net
 
 def get_train_dataloader(path, transforms, batch_size, num_workers):
@@ -63,3 +66,44 @@ def get_test_dataloader(path, transforms, batch_size, num_workers):
     )
 
     return test_dataloader
+
+def get_lastlayer_params(net):
+    """get last trainable layer of a net
+    Args:
+        network architectur
+    
+    Returns:
+        last layer weights and last layer bias
+    """
+    last_layer_weights = None
+    last_layer_bias = None
+    for name, para in net.named_parameters():
+        if 'weight' in name:
+            last_layer_weights = para
+        if 'bias' in name:
+            last_layer_bias = para
+        
+    return last_layer_weights, last_layer_bias
+
+def visualize_network(writer, net):
+    """visualize network architecture"""
+    input_tensor = torch.Tensor(3, 3, settings.IMAGE_SIZE, settings.IMAGE_SIZE) 
+    input_tensor.to(next(net.parameters()).device)
+    writer.add_graph(net, Variable(input_tensor, requires_grad=True))
+
+def visualize_lastlayer(writer, net, n_iter):
+    """visualize last layer grads"""
+    weights, bias = get_lastlayer_params(net)
+    writer.add_scalar('LastLayerGradients/grad_norm2_weights', weights.grad.norm(), n_iter)
+    writer.add_scalar('LastLayerGradients/grad_norm2_bias', bias.grad.norm(), n_iter)
+
+def visualize_train_loss(writer, loss, n_iter):
+    """visualize training loss"""
+    writer.add_scalar('Train/loss', loss, n_iter)
+
+def visualize_param_hist(writer, net, epoch):
+    """visualize histogram of params"""
+    for name, param in net.named_parameters():
+        layer, attr = os.path.splitext(name)
+        attr = attr[1:]
+        writer.add_histogram("{}/{}".format(layer, attr), param, epoch)
