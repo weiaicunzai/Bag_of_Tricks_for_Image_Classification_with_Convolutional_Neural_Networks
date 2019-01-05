@@ -106,7 +106,6 @@ if __name__ == '__main__':
                 trained_samples=batch_index * args.b + len(images),
                 total_samples=len(train_dataloader.dataset)
             ))
-            #print(batch_index,  len(images))
 
             #visualization
             visualize_lastlayer(writer, net, n_iter)
@@ -128,10 +127,10 @@ if __name__ == '__main__':
             correct += preds.eq(labels).sum().float()
 
             loss = loss_function(predicts, labels)
-            total += loss.item()
+            total_loss += loss.item()
 
 
-        test_loss = total / len(test_dataloader)
+        test_loss = total_loss / len(test_dataloader)
         acc = correct / len(test_dataloader.dataset)
         print('Test set: loss: {:.4f}, Accuracy: {:.4f}'.format(test_loss, acc))
         print()
