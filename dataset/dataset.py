@@ -42,7 +42,7 @@ class CUB_200_2011_Train(Dataset):
             image and its corresponding label
         """
         image_id = self.train_id[index]
-        class_id = int(self._get_class_by_id(image_id))
+        class_id = int(self._get_class_by_id(image_id)) - 1
         path = self._get_path_by_id(image_id)
         image = cv2.imread(os.path.join(self.root, 'images', path))
 
@@ -99,7 +99,7 @@ class CUB_200_2011_Test(Dataset):
             image and its corresponding label
         """
         image_id = self.train_id[index]
-        class_id = int(self._get_class_by_id(image_id))
+        class_id = int(self._get_class_by_id(image_id)) - 1
         path = self._get_path_by_id(image_id)
         image = cv2.imread(os.path.join(self.root, 'images', path))
 
