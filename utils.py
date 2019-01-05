@@ -6,7 +6,7 @@ import torch
 
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
-from conf.settings import settings
+from conf import settings
 from dataset.dataset import CUB_200_2011_Train, CUB_200_2011_Test
 
 def get_network(args):
