@@ -16,11 +16,6 @@ from tensorboardX import SummaryWriter
 from conf import settings
 from utils import *
 
-path = '/Users/didi/Downloads/train/2d281959a02178bbcdeea424c8757b1d.jpg'
-
-
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -31,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', type=int, default=120, help='training epoches')
     args = parser.parse_args()
 
+    #checkpoint directory
     checkpoint_path = os.path.join(settings.CHECKPOINT_PATH, args.net, settings.TIME_NOW)
     if not os.path.exists(checkpoint_path):
         os.makedirs(checkpoint_path)
@@ -75,12 +71,12 @@ if __name__ == '__main__':
     net = get_network(args)
     net.to(device)
 
+    #visualize the network
+    visualize_network(writer, net)
+
     loss_function = nn.CrossEntropyLoss() 
     optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4, nesterov=True)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
-
-    #visualize the network
-    visualize_network(writer, net)
 
     best_acc = 0.0
     for epoch in range(1, args.e):
@@ -88,6 +84,7 @@ if __name__ == '__main__':
 
         #training procedure
         net.train()
+        
         for batch_index, (images, labels) in enumerate(train_dataloader):
 
             images = images.to(device)
@@ -112,7 +109,46 @@ if __name__ == '__main__':
             visualize_train_loss(writer, loss.item(), n_iter)
 
         visualize_param_hist(writer, net, epoch) 
-        #net.eval()
+
+        net.eval()
+
+        total_loss = 0
+        correct = 0
+        for images, labels in test_dataloader:
+
+            images = images.to(device)
+            labels = labels.to(device)
+
+            predicts = net(images)
+            _, preds = predicts.max(1)
+            correct += preds.eq(labels).sum().float()
+
+            loss = loss_function(predicts, labels)
+            total += loss.item()
+
+
+        test_loss = total / len(test_dataloader)
+        acc = correct / len(test_dataloader.dataset)
+        print('Test set: loss: {:.4f}, Accuracy: {:.4f}'.format(test_loss, acc))
+        print()
+
+        visualize_test_loss(writer, test_loss, epoch)
+        visualize_test_acc(writer, acc, epoch)
+
+        #save weights file
+        if epoch > settings.MILESTONES[1] and best_acc < acc:
+            torch.save(net.state_dict(), checkpoint_path.format(net=args.net, epoch=epoch, type='best'))
+            best_acc = acc
+            continue
+        
+        if not epoch % settings.SAVE_EPOCH:
+            torch.save(net.state_dict(), checkpoint_path.format(net=args.net, epoch=epoch, type='regular'))
+    
+    writer.close()
+
+
+
+
 
 
 
@@ -124,58 +160,3 @@ if __name__ == '__main__':
 
     
 
-    #cv2.imshow('origin', image)
-    #trans = transforms.CenterCrop()
-    #image = trans(image)
-#trans = transforms.ToFloat()
-#image = trans(image)
-#print(image.dtype)
-    #trans = transforms.RandomResizedCrop(224)
-    #image = trans(image)
-#print(image.dtype)
-    #trans = transforms.RandomHorizontalFlip()
-    #image = trans(image)
-#print(image.dtype)
-    #trans = transforms.ColorJitter()
-    #image = trans(image)
-#print(image.dtype)
-    #trans = transforms.Normalize(mean=[0.7, 0.8, 0.3], std=[0.1, 0.2, 0.3])
-    #image = trans(image)
-#print(image.dtype)
-#trans = transforms.ToTensor()
-#image = trans(image)
-
-    #cv2.imshow('test', image)
-    #cv2.waitKey(0)
-#print(type(image))
-#print(image.size())
-#print(image.dtype)
-#print(torch.max(image))
-#cv2.imshow('test', image)
-#cv2.waitKey(0)
-#print(image.shape)
-#
-#print(image.dtype)
-#print(np.max(image))
-#image = image.astype('float32')
-#
-#print(image.dtype)
-#print(np.max(image))
-#
-#
-#
-#
-
-#transform_train = transforms.Compose([
-#        transforms.ToFloat(), #
-#        transforms.RandomResizedCrop(224),
-#        transforms.RandomHorizontalFlip(),
-#        transforms.ColorJitter(),
-#        transforms.Normalize(mean_train, std_train),
-#        transforms.ToTensor(),
-#    ])
-#
-#transform_test = transforms.Compose([
-#        transforms.CenterCrop(),
-#        transforms.Normalize(mean_train, std_train)
-#])

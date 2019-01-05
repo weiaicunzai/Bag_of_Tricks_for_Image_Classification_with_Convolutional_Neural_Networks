@@ -107,3 +107,11 @@ def visualize_param_hist(writer, net, epoch):
         layer, attr = os.path.splitext(name)
         attr = attr[1:]
         writer.add_histogram("{}/{}".format(layer, attr), param, epoch)
+
+def visualize_test_loss(writer, loss, epoch):
+    """visualize test loss"""
+    writer.add_scalar('Test/loss', loss, epoch)
+
+def visualize_test_acc(writer, acc, epoch):
+    """visualize test acc"""
+    writer.add_scaler('Test/Accuracy', acc, epoch)
