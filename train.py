@@ -11,7 +11,8 @@ import torch.optim as optim
 import numpy as np
 
 #from PIL import Image
-import transforms 
+#import transforms 
+from torchvision import transforms
 from tensorboardX import SummaryWriter
 from conf import settings
 from utils import *
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-net', type=str, required=True, help='net type')
     parser.add_argument('-w', type=int, default=2, help='number of workers for dataloader')
-    parser.add_argument('-b', type=int, default=12, help='batch size for dataloader')
+    parser.add_argument('-b', type=int, default=32, help='batch size for dataloader')
     parser.add_argument('-lr', type=int, default=0.1, help='initial learning rate')
     parser.add_argument('-e', type=int, default=120, help='training epoches')
     args = parser.parse_args()
@@ -40,17 +41,19 @@ if __name__ == '__main__':
 
     #get dataloader
     train_transforms = transforms.Compose([
+        transforms.ToPILImage(),
         transforms.RandomResizedCrop(settings.IMAGE_SIZE),
         transforms.RandomHorizontalFlip(),
-        transforms.ColorJitter(),
-        transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD),
-        transforms.ToTensor()
+       # transforms.ColorJitter(),
+        transforms.ToTensor(),
+        transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD)
     ])
 
     test_transforms = transforms.Compose([
-        transforms.CenterCrop(),
-        transforms.Normalize(settings.TEST_MEAN, settings.TEST_STD),
-        transforms.ToTensor()
+        transforms.ToPILImage(),
+        transforms.CenterCrop(settings.IMAGE_SIZE),
+        transforms.ToTensor(),
+        transforms.Normalize(settings.TEST_MEAN, settings.TEST_STD)
     ])
 
     train_dataloader = get_train_dataloader(
@@ -100,9 +103,10 @@ if __name__ == '__main__':
             print('Training Epoch: {epoch} [{trained_samples}/{total_samples}]\tLoss: {:0.4f}\t'.format(
                 loss.item(),
                 epoch=epoch,
-                trained_samples=batch_index * len(images),
+                trained_samples=batch_index * args.b + len(images),
                 total_samples=len(train_dataloader.dataset)
             ))
+            #print(batch_index,  len(images))
 
             #visualization
             visualize_lastlayer(writer, net, n_iter)

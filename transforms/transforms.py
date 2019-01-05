@@ -176,14 +176,22 @@ class ColorJitter:
         img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         h, s, b = cv2.split(img_hsv)
 
+        h = h.astype('float32')
+        s = s.astype('float32')
+        b = b.astype('float32')
+
         h = h * h_factor
         b = b * b_factor
         s = s * s_factor
 
+        print(h_factor, b_factor, s_factor)
         #normalize
         h = h / np.max(h) * 255.0
+        print('h: ', np.max(h))
         b = b / np.max(b) * 255.0
+        print('b: ', np.max(b))
         s = s / np.max(s) * 255.0
+        print('s: ', np.max(s))
 
         #convert data type
         h = h.astype(img_hsv.dtype)
@@ -239,6 +247,9 @@ class Normalize:
         Returns:
             (H W C) format numpy array in float32 range from [0, 1]
         """        
+        dtype = img.dtype
+
+        img = img.astype('float32')
         img = img / 255.0
 
         for index, mean in enumerate(self.mean):
@@ -247,6 +258,7 @@ class Normalize:
         for index, std in enumerate(self.std):
             img[:, :, index] /= std
         
+        img = img.astype(dtype)
         return img
 
         
