@@ -88,7 +88,7 @@ def get_lastlayer_params(net):
 def visualize_network(writer, net):
     """visualize network architecture"""
     input_tensor = torch.Tensor(3, 3, settings.IMAGE_SIZE, settings.IMAGE_SIZE) 
-    input_tensor.to(next(net.parameters()).device)
+    input_tensor = input_tensor.to(next(net.parameters()).device)
     writer.add_graph(net, Variable(input_tensor, requires_grad=True))
 
 def visualize_lastlayer(writer, net, n_iter):
