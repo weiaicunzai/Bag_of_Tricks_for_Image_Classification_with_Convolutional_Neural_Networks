@@ -125,4 +125,4 @@ def visualize_test_loss(writer, loss, epoch):
 
 def visualize_test_acc(writer, acc, epoch):
     """visualize test acc"""
-    writer.add_scaler('Test/Accuracy', acc, epoch)
+    writer.add_scalar('Test/Accuracy', acc, epoch)
