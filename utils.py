@@ -29,16 +29,21 @@ def get_network(args):
 
     return net
 
-def get_train_dataloader(path, transforms, batch_size, num_workers):
+def get_train_dataloader(path, transforms, batch_size, num_workers, target_transforms=None):
     """ return training dataloader
     Args:
         path: path to CUB_200_2011 dataset
         transforms: transforms of dataset
+        target_transforms: transforms for targets
         batch_size: dataloader batchsize
         num_workers: dataloader num_works
     Returns: train_data_loader:torch dataloader object
     """
-    train_dataset = CUB_200_2011_Train(path, transform=transforms)
+    train_dataset = CUB_200_2011_Train(
+        path, 
+        transform=transforms,
+        target_transform=target_transforms
+    )
     train_dataloader =  DataLoader(
         train_dataset,
         batch_size=batch_size,
@@ -48,16 +53,22 @@ def get_train_dataloader(path, transforms, batch_size, num_workers):
 
     return train_dataloader
 
-def get_test_dataloader(path, transforms, batch_size, num_workers):
+def get_test_dataloader(path, transforms, batch_size, num_workers, target_transforms=None):
     """ return training dataloader
     Args:
         path: path to CUB_200_2011 dataset
         transforms: transforms of dataset
+        target_transforms: transforms for targets
         batch_size: dataloader batchsize
         num_workers: dataloader num_works
     Returns: train_data_loader:torch dataloader object
     """
-    test_dataset = CUB_200_2011_Test(path, transform=transforms)
+    test_dataset = CUB_200_2011_Test(
+        path, 
+        transform=transforms,
+        target_transform=target_transforms
+    )
+
     test_dataloader =  DataLoader(
         test_dataset,
         batch_size=batch_size,

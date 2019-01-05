@@ -2,16 +2,16 @@
 import os
 
 import cv2
-import torch
 import numpy as np
 from torch.utils.data import Dataset
 
 class CUB_200_2011_Train(Dataset):
 
-    def __init__(self, path, transform=None):
+    def __init__(self, path, transform=None, target_transform=None):
 
         self.root = path
         self.transform = transform
+        self.target_transform = target_transform
         self.images_path = {}
         with open(os.path.join(self.root, 'images.txt')) as f:
             for line in f:
@@ -42,13 +42,15 @@ class CUB_200_2011_Train(Dataset):
             image and its corresponding label
         """
         image_id = self.train_id[index]
-        class_id = self._get_class_by_id(image_id)
+        class_id = int(self._get_class_by_id(image_id))
         path = self._get_path_by_id(image_id)
         image = cv2.imread(os.path.join(self.root, 'images', path))
 
         if self.transform:
             image = self.transform(image)
 
+        if self.target_transform:
+            class_id = self.target_transform(class_id)
         return image, class_id
 
     def _get_path_by_id(self, image_id):
@@ -62,10 +64,11 @@ class CUB_200_2011_Train(Dataset):
 
 class CUB_200_2011_Test(Dataset):
 
-    def __init__(self, path, transform=None):
+    def __init__(self, path, transform=None, target_transform=None):
 
         self.root = path
         self.transform = transform
+        self.target_transform = target_transform
         self.images_path = {}
         with open(os.path.join(self.root, 'images.txt')) as f:
             for line in f:
@@ -96,12 +99,15 @@ class CUB_200_2011_Test(Dataset):
             image and its corresponding label
         """
         image_id = self.train_id[index]
-        class_id = self._get_class_by_id(image_id)
+        class_id = int(self._get_class_by_id(image_id))
         path = self._get_path_by_id(image_id)
         image = cv2.imread(os.path.join(self.root, 'images', path))
 
         if self.transform:
             image = self.transform(image)
+
+        if self.target_transform:
+            class_id = self.target_transform(class_id)
 
         return image, class_id
 
