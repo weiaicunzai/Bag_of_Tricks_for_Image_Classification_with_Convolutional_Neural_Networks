@@ -45,11 +45,13 @@ class CUB_200_2011_Train(Dataset):
         image_id = self.train_id[index]
         class_id = int(self._get_class_by_id(image_id)) - 1
         path = self._get_path_by_id(image_id)
-        #image = cv2.imread(os.path.join(self.root, 'images', path))
-        image = Image.open(os.path.join(self.root, 'images', path))
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-        image = np.array(image)
+        image = cv2.imread(os.path.join(self.root, 'images', path))
+        #image = Image.open(os.path.join(self.root, 'images', path))
+        #if image.mode != 'RGB':
+        #    image = image.convert('RGB')
+        if len(image.shape) != 3:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        #image = np.array(image)
 
         if self.transform:
             image = self.transform(image)
@@ -106,11 +108,15 @@ class CUB_200_2011_Test(Dataset):
         image_id = self.train_id[index]
         class_id = int(self._get_class_by_id(image_id)) - 1
         path = self._get_path_by_id(image_id)
-        #image = cv2.imread(os.path.join(self.root, 'images', path))
-        image = Image.open(os.path.join(self.root, 'images', path))
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
-        image = np.array(image)
+        image = cv2.imread(os.path.join(self.root, 'images', path))
+        #image = Image.open(os.path.join(self.root, 'images', path))
+        #if image.mode != 'RGB':
+        #    image = image.convert('RGB')
+        #image = np.array(image)
+
+
+        if len(image.shape) != 3:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
 
         if self.transform:

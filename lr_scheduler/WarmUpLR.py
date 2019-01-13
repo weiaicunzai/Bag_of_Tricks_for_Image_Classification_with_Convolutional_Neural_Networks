@@ -1,0 +1,24 @@
+
+import torch
+from torch.optim.lr_scheduler import _LRScheduler
+
+
+class WarmUp(_LRScheduler):
+    """warmup_training learning rate scheduler
+
+    Args:
+        optimizer: optimzier(e.g. SGD)
+        total_iters: totoal_iters of warmup phase
+    """
+    def __init__(self, optimizer, total_iters, last_epoch=-1):
+        
+        super().__init__()
+        self.total_iters = total_iters
+
+    def get_lr(self):
+        """we will use the first m batches, and set the learning
+        rate to base_lr * m / total_iters
+        """
+        return [base_lr * self.last_epoch / self.total_iters for base_lr in self.base_lrs]
+
+

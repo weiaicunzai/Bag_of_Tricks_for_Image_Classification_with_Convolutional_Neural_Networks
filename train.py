@@ -19,15 +19,17 @@ from torchvision import transforms
 from tensorboardX import SummaryWriter
 from conf import settings
 from utils import *
+from lr_scheduler import WarmUpLR
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-net', type=str, required=True, help='net type')
-    parser.add_argument('-w', type=int, default=2, help='number of workers for dataloader')
+    parser.add_argument('-w', type=int, default=4, help='number of workers for dataloader')
     parser.add_argument('-b', type=int, default=64, help='batch size for dataloader')
-    parser.add_argument('-lr', type=float, default=0.001, help='initial learning rate')
-    parser.add_argument('-e', type=int, default=190, help='training epoches')
+    parser.add_argument('-lr', type=float, default=0.025, help='initial learning rate')
+    parser.add_argument('-e', type=int, default=450, help='training epoches')
+    parser.add_argument('-warm', type=int, default=5, help='warm up phase')
     args = parser.parse_args()
 
     #checkpoint directory
@@ -56,7 +58,7 @@ if __name__ == '__main__':
         transforms.ToPILImage(),
         transforms.CenterCrop(settings.IMAGE_SIZE),
         transforms.ToTensor(),
-        transforms.Normalize(settings.TEST_MEAN, settings.TEST_STD)
+        transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_MEAN)
     ])
 
     train_dataloader = get_train_dataloader(
@@ -82,18 +84,24 @@ if __name__ == '__main__':
     visualize_network(writer, net)
 
     loss_function = nn.CrossEntropyLoss() 
-    optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4, nesterov=True)
+    optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4, nesterov=True)
     #optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=5e-4, amsgrad=True)
+    iter_per_epoch = len(train_dataloader)
+    warmup_scheduler = WarmUpLR(optimizer, iter_per_epoch * args.warm)
+
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
 
     best_acc = 0.0
-    for epoch in range(1, args.e):
-        scheduler.step()
+    for epoch in range(1, args.e + 1):
+        if epoch > 5:
+            scheduler.step(epoch)
 
         #training procedure
         net.train()
         
         for batch_index, (images, labels) in enumerate(train_dataloader):
+            if epoch <= 5:
+                warmup_scheduler.step()
 
             images = images.to(device)
             labels = labels.to(device)
@@ -116,6 +124,7 @@ if __name__ == '__main__':
             visualize_lastlayer(writer, net, n_iter)
             visualize_train_loss(writer, loss.item(), n_iter)
 
+        visualize_learning_rate(writer, net.param_groups[0]['lr'], epoch)
         visualize_param_hist(writer, net, epoch) 
 
         net.eval()
@@ -133,7 +142,6 @@ if __name__ == '__main__':
 
             loss = loss_function(predicts, labels)
             total_loss += loss.item()
-
 
         test_loss = total_loss / len(test_dataloader)
         acc = correct / len(test_dataloader.dataset)

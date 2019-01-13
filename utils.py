@@ -128,6 +128,10 @@ def visualize_test_acc(writer, acc, epoch):
     """visualize test acc"""
     writer.add_scalar('Test/Accuracy', acc, epoch)
 
+def visualize_learning_rate(writer, lr, epoch):
+    """visualize learning rate"""
+    writer.add_scalar('Train/LearningRate', lr, epoch)
+
 def init_weights(net):
     """the weights of conv layer and fully connected layers 
     are both initilized with Xavier algorithm, In particular,
@@ -137,8 +141,8 @@ def init_weights(net):
     """
     for m in net.modules():
         if isinstance(m, nn.Conv2d):
-            #nn.init.xavier_uniform_(m.weight)
-            nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            nn.init.xavier_uniform_(m.weight)
+            #nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
             
@@ -154,3 +158,24 @@ def init_weights(net):
 
     return net
 
+def net_weights(net):
+    """get weights of conv and linear layer of a
+    network
+
+    Args:
+        net: network
+    
+    Returns:
+        generator of netword's conv and linear layer
+        weight parameters, no bias paraters
+    """
+    for m in net.modules():
+        if isinstance(m, nn.Conv2d):
+            yield m.weight
+        
+        elif isinstance(m, nn.Linear):
+            yield m.weight
+
+
+    
+    
