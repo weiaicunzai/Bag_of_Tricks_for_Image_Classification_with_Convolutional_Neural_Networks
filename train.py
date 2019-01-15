@@ -27,9 +27,10 @@ if __name__ == '__main__':
     parser.add_argument('-net', type=str, required=True, help='net type')
     parser.add_argument('-w', type=int, default=4, help='number of workers for dataloader')
     parser.add_argument('-b', type=int, default=64, help='batch size for dataloader')
-    parser.add_argument('-lr', type=float, default=0.025, help='initial learning rate')
+    parser.add_argument('-lr', type=float, default=0.01, help='initial learning rate')
     parser.add_argument('-e', type=int, default=450, help='training epoches')
     parser.add_argument('-warm', type=int, default=5, help='warm up phase')
+    parser.add_argument('-gpus', nargs='+', default=0, help='gpu device')
     args = parser.parse_args()
 
     #checkpoint directory
@@ -58,7 +59,7 @@ if __name__ == '__main__':
         transforms.ToPILImage(),
         transforms.CenterCrop(settings.IMAGE_SIZE),
         transforms.ToTensor(),
-        transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_MEAN)
+        transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD)
     ])
 
     train_dataloader = get_train_dataloader(
@@ -77,8 +78,12 @@ if __name__ == '__main__':
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
     net = get_network(args)
-    #net = init_weights(net)
+    net = init_weights(net)
     net.to(device)
+
+    
+    if not isinstance(args.gpus, int):
+        net = nn.DataParallel(net, device_ids=args.gpus)
 
     #visualize the network
     visualize_network(writer, net)
@@ -93,14 +98,14 @@ if __name__ == '__main__':
 
     best_acc = 0.0
     for epoch in range(1, args.e + 1):
-        if epoch > 5:
+        if epoch > args.warm:
             scheduler.step(epoch)
 
         #training procedure
         net.train()
         
         for batch_index, (images, labels) in enumerate(train_dataloader):
-            if epoch <= 5:
+            if epoch <= args.warm:
                 warmup_scheduler.step()
 
             images = images.to(device)
@@ -124,7 +129,7 @@ if __name__ == '__main__':
             visualize_lastlayer(writer, net, n_iter)
             visualize_train_loss(writer, loss.item(), n_iter)
 
-        visualize_learning_rate(writer, net.param_groups[0]['lr'], epoch)
+        visualize_learning_rate(writer, optimizer.param_groups[0]['lr'], epoch)
         visualize_param_hist(writer, net, epoch) 
 
         net.eval()
