@@ -94,12 +94,13 @@ if __name__ == '__main__':
     iter_per_epoch = len(train_dataloader)
     warmup_scheduler = WarmUpLR(optimizer, iter_per_epoch * args.warm)
 
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
+    #scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
+    train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.e - args.warm)
 
     best_acc = 0.0
     for epoch in range(1, args.e + 1):
         if epoch > args.warm:
-            scheduler.step(epoch)
+            train_scheduler.step()
 
         #training procedure
         net.train()
