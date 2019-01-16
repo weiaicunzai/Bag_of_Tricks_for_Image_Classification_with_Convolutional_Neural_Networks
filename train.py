@@ -89,11 +89,16 @@ if __name__ == '__main__':
     visualize_network(writer, net)
 
     loss_function = nn.CrossEntropyLoss() 
-    optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4, nesterov=True)
-    #optimizer = optim.Adam(net.parameters(), lr=args.lr, weight_decay=5e-4, amsgrad=True)
+
+    #apply no weight decay on bias
+    params = split_weights(net)
+    optimizer = optim.SGD(params, lr=args.lr, momentum=0.9, weight_decay=1e-4, nesterov=True)
+
+    #set up warmup phase learning rate scheduler
     iter_per_epoch = len(train_dataloader)
     warmup_scheduler = WarmUpLR(optimizer, iter_per_epoch * args.warm)
 
+    #set up training phase learning rate scheduler
     #scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
     train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.e - args.warm)
 

@@ -158,24 +158,41 @@ def init_weights(net):
 
     return net
 
-def net_weights(net):
-    """get weights of conv and linear layer of a
-    network
+def split_weights(net):
+    """split network weights into to categlories,
+    one are weights in conv layer and linear layer,
+    others are other learnable paramters(conv bias, 
+    bn weights, bn bias, linear bias)
 
     Args:
-        net: network
+        net: network architecture
     
     Returns:
-        generator of netword's conv and linear layer
-        weight parameters, no bias paraters
+        a dictionary of params splite into to categlories
     """
+
+    decay = []
+    no_decay = []
+
     for m in net.modules():
-        if isinstance(m, nn.Conv2d):
-            yield m.weight
+        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            decay.append(m.weight)
+
+            if m.bias is not None:
+                no_decay.append(m.bias)
         
-        elif isinstance(m, nn.Linear):
-            yield m.weight
+        else:
+            no_decay.append(m.weight)
+            
+            #for PReLU layer
+            if hasattr(m, 'bias') and m.bias is not None:
+                no_decay.append(m.bias)
+
+    assert len(list(net.parameters())) == len(decay) + len(no_decay)
+
+    return [dict(params=decay), dict(params=no_decay, weight_decay=0)]
 
 
-    
+
+
     
