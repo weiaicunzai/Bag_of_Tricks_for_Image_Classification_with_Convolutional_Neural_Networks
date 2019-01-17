@@ -20,6 +20,7 @@ from tensorboardX import SummaryWriter
 from conf import settings
 from utils import *
 from lr_scheduler import WarmUpLR
+from criterion import LSR
 
 if __name__ == '__main__':
 
@@ -88,7 +89,8 @@ if __name__ == '__main__':
     #visualize the network
     visualize_network(writer, net)
 
-    loss_function = nn.CrossEntropyLoss() 
+    #loss_function = nn.CrossEntropyLoss() 
+    loss_function = LSR()
 
     #apply no weight decay on bias
     params = split_weights(net)
@@ -99,8 +101,8 @@ if __name__ == '__main__':
     warmup_scheduler = WarmUpLR(optimizer, iter_per_epoch * args.warm)
 
     #set up training phase learning rate scheduler
-    #scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
-    train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.e - args.warm)
+    train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
+    #train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.e - args.warm)
 
     best_acc = 0.0
     for epoch in range(1, args.e + 1):

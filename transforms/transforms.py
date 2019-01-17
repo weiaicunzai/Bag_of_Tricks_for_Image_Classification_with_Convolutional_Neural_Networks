@@ -77,7 +77,6 @@ class RandomResizedCrop:
         self.scale = scale
         self.ratio = ratio
 
-    
     def __call__(self, img):
         h, w, _ = img.shape
 
@@ -156,10 +155,47 @@ class ColorJitter:
         s: range to scale saturation
     """
 
-    def __init__(self, h=[0.6, 1.4], b=[0.6, 1.4], s=[0.6, 1.4]):
-        self.h = h
-        self.b = b
-        self.s = s
+    #def __init__(self, h=[0.6, 1.4], b=[0.6, 1.4], s=[0.6, 1.4]):
+
+    #    self.h = h
+    #    self.b = b
+    #    self.s = s
+
+    def __init__(self, brightness=0, contrast=0, staturation=0, hue=0):
+        """Randomly change the brightness, contrast and saturation of an image
+
+        Args:
+            brightness: (float or tuple of float(min, max)): how much to jitter
+                brightness, brightness_factor is choosen uniformly from[max(0, 1-brightness),
+                1 + brightness] or the given [min, max], Should be non negative numbers
+            
+            contrast: same as brightness
+            staturation: same as birghtness
+            hue: same as brightness
+        """        
+
+    
+    def _check_input(self, value):
+
+        assert(value >= 0, 'value should be non negative')
+        assert(value <= 1, 'value should be less than 1')
+        
+        if isinstance(value, float, int):
+            value = [1 - value, 1 + value]
+        
+        elif isinstance(value, list, tuple):
+            assert(len(value) == 2, 'brightness should be a tuple/list with 2 elements')
+            assert(value[0] <= value[1], 'max should be larger than or equal to min')
+
+        else:
+            raise TypeError('need to pass int, float, list or tuple, instead got{}'.format(type(value).__name__))
+
+
+
+
+        
+
+
 
     def __call__(self, img):
         """

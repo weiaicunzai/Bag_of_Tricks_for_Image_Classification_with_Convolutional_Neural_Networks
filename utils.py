@@ -181,12 +181,12 @@ def split_weights(net):
             if m.bias is not None:
                 no_decay.append(m.bias)
         
-        else:
-            no_decay.append(m.weight)
-            
-            #for PReLU layer
-            if hasattr(m, 'bias') and m.bias is not None:
+        else: 
+            if hasattr(m, 'weight'):
+                no_decay.append(m.weight)
+            if hasattr(m, 'bias'):
                 no_decay.append(m.bias)
+        
 
     assert len(list(net.parameters())) == len(decay) + len(no_decay)
 
