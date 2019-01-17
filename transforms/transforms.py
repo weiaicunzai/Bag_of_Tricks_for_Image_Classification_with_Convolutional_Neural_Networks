@@ -35,8 +35,8 @@ class Compose:
         return format_string
 
 
-class ToFloat:
-    """Convert an image data type to 32-bit floating point
+class ToCVImage:
+    """Convert an Opencv image to a 3 channel uint8 image
     """
 
     def __call__(self, image):
@@ -47,7 +47,12 @@ class ToFloat:
         Returns:
             image (numpy array): Converted Image
         """
-        return image.astype('float32')
+        if len(image.shape) == 2:
+            image = cv2.cvtColor(iamge, cv2.COLOR_GRAY2BGR)
+        
+        image = image.astype('uint8')
+            
+        return image
 
 
 class RandomResizedCrop:
@@ -144,58 +149,41 @@ class RandomHorizontalFlip:
         
         return img
 
-
 class ColorJitter:
-    """Scale hue, saturation, and brightness with coefficients uniformly
-    drawn from [0.6, 1.4]
+
+    """Randomly change the brightness, contrast and saturation of an image
 
     Args:
-        h: range to scale hue
-        b: range to scale brightness
-        s: range to scale saturation
-    """
-
-    #def __init__(self, h=[0.6, 1.4], b=[0.6, 1.4], s=[0.6, 1.4]):
-
-    #    self.h = h
-    #    self.b = b
-    #    self.s = s
+        brightness: (float or tuple of float(min, max)): how much to jitter
+            brightness, brightness_factor is choosen uniformly from[max(0, 1-brightness),
+            1 + brightness] or the given [min, max], Should be non negative numbe
+        contrast: same as brightness
+        staturation: same as birghtness
+        hue: same as brightness
+    """        
 
     def __init__(self, brightness=0, contrast=0, staturation=0, hue=0):
-        """Randomly change the brightness, contrast and saturation of an image
+        self.brightness = self._check_input(brightness)
+        self.contrast = self._check_input(contrast)
+        self.staturation = self._check_input(staturation)
+        self.hue = self._check_input(hue)
 
-        Args:
-            brightness: (float or tuple of float(min, max)): how much to jitter
-                brightness, brightness_factor is choosen uniformly from[max(0, 1-brightness),
-                1 + brightness] or the given [min, max], Should be non negative numbers
-            
-            contrast: same as brightness
-            staturation: same as birghtness
-            hue: same as brightness
-        """        
-
-    
     def _check_input(self, value):
 
-        assert(value >= 0, 'value should be non negative')
-        assert(value <= 1, 'value should be less than 1')
+        if isinstance(value, numbers.Number):
+            assert value >= 0, 'value should be non negative'
+            value = [max(0, 1 - value), 1 + value]
         
-        if isinstance(value, float, int):
-            value = [1 - value, 1 + value]
-        
-        elif isinstance(value, list, tuple):
-            assert(len(value) == 2, 'brightness should be a tuple/list with 2 elements')
-            assert(value[0] <= value[1], 'max should be larger than or equal to min')
+        elif isinstance(value, (list, tuple)):
+            assert len(value) == 2, 'brightness should be a tuple/list with 2 elements'
+            assert 0 <= value[0] <= value[1], 'max should be larger than or equal to min,\
+            and both larger than 0'
 
         else:
             raise TypeError('need to pass int, float, list or tuple, instead got{}'.format(type(value).__name__))
 
 
-
-
-        
-
-
+        return value
 
     def __call__(self, img):
         """
@@ -205,43 +193,40 @@ class ColorJitter:
             jittered img
         """
 
-        h_factor = random.uniform(*self.h)
-        b_factor = random.uniform(*self.b)
-        s_factor = random.uniform(*self.s)
+        img_dtype = img.dtype
+        h_factor = random.uniform(*self.hue)
+        b_factor = random.uniform(*self.brightness)
+        s_factor = random.uniform(*self.staturation)
+        c_factor = random.uniform(*self.contrast)
 
-        img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        h, s, b = cv2.split(img_hsv)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        img = img.astype('float32')
 
-        h = h.astype('float32')
-        s = s.astype('float32')
-        b = b.astype('float32')
+        #h
+        img[:, :, 0] *= h_factor
+        img[:, :, 0] = np.clip(img[:, :, 0], 0, 179)
 
-        h = h * h_factor
-        b = b * b_factor
-        s = s * s_factor
+        #s
+        img[:, :, 1] *= s_factor
+        img[:, :, 1] = np.clip(img[:, :, 1], 0, 255)
 
-        print(h_factor, b_factor, s_factor)
-        #normalize
-        h = h / np.max(h) * 255.0
-        print('h: ', np.max(h))
-        b = b / np.max(b) * 255.0
-        print('b: ', np.max(b))
-        s = s / np.max(s) * 255.0
-        print('s: ', np.max(s))
+        #v
+        img[:, :, 2] *= b_factor
+        img[:, :, 2] = np.clip(img[:, :, 2], 0, 255)
 
-        #convert data type
-        h = h.astype(img_hsv.dtype)
-        b = b.astype(img_hsv.dtype)
-        s = s.astype(img_hsv.dtype)
+        img = img.astype(img_dtype)
+        img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
-        img_hsv = cv2.merge((h, s, b))
-        img = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR)
+        #c
+        img = img * c_factor
+        img = img.astype(img_dtype)
+        img = np.clip(img, 0, 255)
 
         return img
 
 class ToTensor:
-    """convert an opencv image (h, w, c) ndarray to a pytorch float tensor 
-    (c, h, w) 
+    """convert an opencv image (h, w, c) ndarray range from 0 to 255 to a pytorch 
+    float tensor (c, h, w) 
     """
 
     def __call__(self, img):
@@ -255,16 +240,14 @@ class ToTensor:
         #convert format H W C to C H W
         img = img.transpose(2, 0, 1)
         img = torch.from_numpy(img)
-        img = img.float()
+        img = img.float() / 255.0
 
         return img
 
-
 class Normalize:
-    """Normalize a numpy array (H, W, BGR order) with mean and standard deviation
-    to float32 data type range from [0, 1]
-
-    for each channel in numpy array:
+    """Normalize a torch tensor (H, W, BGR order) with mean and standard deviation
+    
+    for each channel in torch tensor:
         ``input[channel] = (input[channel] - mean[channel]) / std[channel]``
 
     Args:
@@ -272,9 +255,10 @@ class Normalize:
         std: sequence of stds for each channel
     """
 
-    def __init__(self, mean, std):
+    def __init__(self, mean, std, inplace=False):
         self.mean = mean
         self.std = std
+        self.inplace = inplace
     
     def __call__(self, img):
         """
@@ -283,21 +267,17 @@ class Normalize:
         Returns:
             (H W C) format numpy array in float32 range from [0, 1]
         """        
-        dtype = img.dtype
+        assert torch.is_tensor(img) and img.ndimensio() == 3, 'not an image tensor'
 
-        img = img.astype('float32')
-        img = img / 255.0
+        if not inplace:
+            img = img.clone()
 
-        for index, mean in enumerate(self.mean):
-            img[:, :, index] -= mean
-        
-        for index, std in enumerate(self.std):
-            img[:, :, index] /= std
-        
-        img = img.astype(dtype)
+        mean = torch.tensor(mean, dtype=torch.float32)
+        std = torch.tensor(std, dtype=torch.float32)
+        img.sub_(mean[:, None, None]).div_(std[:, None, None])
+
         return img
 
-        
 class CenterCrop:
     """resize each image’s shorter edge to r pixels while keeping its aspect ratio. 
     Next, we crop out the cropped region in the center 
@@ -307,7 +287,7 @@ class CenterCrop:
                  image
     """
 
-    def __init__(self, resized=256, cropped=224, interpolation='linear'):
+    def __init__(self, cropped, resized=256, interpolation='linear'):
 
         methods = {
             "area":cv2.INTER_AREA, 
@@ -342,3 +322,4 @@ class CenterCrop:
                              topleft_x : topleft_x + self.cropped[1]]
 
         return center_cropped
+
