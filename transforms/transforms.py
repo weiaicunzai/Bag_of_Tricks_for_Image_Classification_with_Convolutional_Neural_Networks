@@ -158,14 +158,14 @@ class ColorJitter:
             brightness, brightness_factor is choosen uniformly from[max(0, 1-brightness),
             1 + brightness] or the given [min, max], Should be non negative numbe
         contrast: same as brightness
-        staturation: same as birghtness
+        saturation: same as birghtness
         hue: same as brightness
     """        
 
-    def __init__(self, brightness=0, contrast=0, staturation=0, hue=0):
+    def __init__(self, brightness=0, contrast=0, saturation=0, hue=0):
         self.brightness = self._check_input(brightness)
         self.contrast = self._check_input(contrast)
-        self.staturation = self._check_input(staturation)
+        self.saturation = self._check_input(saturation)
         self.hue = self._check_input(hue)
 
     def _check_input(self, value):
@@ -182,7 +182,6 @@ class ColorJitter:
         else:
             raise TypeError('need to pass int, float, list or tuple, instead got{}'.format(type(value).__name__))
 
-
         return value
 
     def __call__(self, img):
@@ -196,7 +195,7 @@ class ColorJitter:
         img_dtype = img.dtype
         h_factor = random.uniform(*self.hue)
         b_factor = random.uniform(*self.brightness)
-        s_factor = random.uniform(*self.staturation)
+        s_factor = random.uniform(*self.saturation)
         c_factor = random.uniform(*self.contrast)
 
         img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -226,7 +225,7 @@ class ColorJitter:
 
 class ToTensor:
     """convert an opencv image (h, w, c) ndarray range from 0 to 255 to a pytorch 
-    float tensor (c, h, w) 
+    float tensor (c, h, w) ranged from 0 to 1
     """
 
     def __call__(self, img):
@@ -267,13 +266,13 @@ class Normalize:
         Returns:
             (H W C) format numpy array in float32 range from [0, 1]
         """        
-        assert torch.is_tensor(img) and img.ndimensio() == 3, 'not an image tensor'
+        assert torch.is_tensor(img) and img.ndimension() == 3, 'not an image tensor'
 
-        if not inplace:
+        if not self.inplace:
             img = img.clone()
 
-        mean = torch.tensor(mean, dtype=torch.float32)
-        std = torch.tensor(std, dtype=torch.float32)
+        mean = torch.tensor(self.mean, dtype=torch.float32)
+        std = torch.tensor(self.std, dtype=torch.float32)
         img.sub_(mean[:, None, None]).div_(std[:, None, None])
 
         return img

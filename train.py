@@ -14,8 +14,8 @@ import torch.optim as optim
 import numpy as np
 
 #from PIL import Image
-#import transforms 
-from torchvision import transforms
+import transforms 
+#from torchvision import transforms
 from tensorboardX import SummaryWriter
 from conf import settings
 from utils import *
@@ -48,7 +48,8 @@ if __name__ == '__main__':
 
     #get dataloader
     train_transforms = transforms.Compose([
-        transforms.ToPILImage(),
+        #transforms.ToPILImage(),
+        transforms.ToCVImage(),
         transforms.RandomResizedCrop(settings.IMAGE_SIZE),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=0.4, saturation=0.4, hue=0.4),
@@ -57,7 +58,7 @@ if __name__ == '__main__':
     ])
 
     test_transforms = transforms.Compose([
-        transforms.ToPILImage(),
+        transforms.ToCVImage(),
         transforms.CenterCrop(settings.IMAGE_SIZE),
         transforms.ToTensor(),
         transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD)
@@ -89,8 +90,9 @@ if __name__ == '__main__':
     #visualize the network
     visualize_network(writer, net)
 
-    #loss_function = nn.CrossEntropyLoss() 
-    loss_function = LSR()
+    cross_entropy = nn.CrossEntropyLoss() 
+    #loss_function = LSR()
+    lsr_loss = LSR()
 
     #apply no weight decay on bias
     params = split_weights(net)
@@ -107,7 +109,7 @@ if __name__ == '__main__':
     best_acc = 0.0
     for epoch in range(1, args.e + 1):
         if epoch > args.warm:
-            train_scheduler.step()
+            train_scheduler.step(epoch)
 
         #training procedure
         net.train()
@@ -121,7 +123,7 @@ if __name__ == '__main__':
 
             optimizer.zero_grad()
             predicts = net(images)
-            loss = loss_function(predicts, labels)
+            loss = lsr_loss(predicts, labels)
             loss.backward()
             optimizer.step()
 
@@ -130,7 +132,7 @@ if __name__ == '__main__':
                 loss.item(),
                 epoch=epoch,
                 trained_samples=batch_index * args.b + len(images),
-                total_samples=len(train_dataloader.dataset)
+                total_samples=len(train_dataloader.dataset),
             ))
 
             #visualization
@@ -153,7 +155,7 @@ if __name__ == '__main__':
             _, preds = predicts.max(1)
             correct += preds.eq(labels).sum().float()
 
-            loss = loss_function(predicts, labels)
+            loss = cross_entropy(predicts, labels)
             total_loss += loss.item()
 
         test_loss = total_loss / len(test_dataloader)

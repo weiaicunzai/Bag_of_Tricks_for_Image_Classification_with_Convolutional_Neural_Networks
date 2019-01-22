@@ -49,8 +49,8 @@ class CUB_200_2011_Train(Dataset):
         #image = Image.open(os.path.join(self.root, 'images', path))
         #if image.mode != 'RGB':
         #    image = image.convert('RGB')
-        if len(image.shape) != 3:
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        #if len(image.shape) != 3:
+        #    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         #image = np.array(image)
 
         if self.transform:
@@ -115,8 +115,8 @@ class CUB_200_2011_Test(Dataset):
         #image = np.array(image)
 
 
-        if len(image.shape) != 3:
-            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        #if len(image.shape) != 3:
+        #    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
 
         if self.transform:

@@ -16,3 +16,8 @@ vgg16 64.60% on cub200_2011 dataset, lr=0.1, batchsize=64
 
 improved acc from 64.60% to 66.07%
 
++no weight decay
++my own transform module
+
+improved acc from 66.07% to 70.14%
+

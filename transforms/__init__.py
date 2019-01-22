@@ -6,6 +6,6 @@ from .transforms import (
     Normalize,
     RandomHorizontalFlip,
     RandomResizedCrop,
-    ToFloat,
-    ToTensor
+    ToTensor,
+    ToCVImage
 )

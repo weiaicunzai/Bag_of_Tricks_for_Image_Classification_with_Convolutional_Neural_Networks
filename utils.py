@@ -2,6 +2,8 @@
 
 import os
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 
@@ -187,11 +189,30 @@ def split_weights(net):
             if hasattr(m, 'bias'):
                 no_decay.append(m.bias)
         
-
     assert len(list(net.parameters())) == len(decay) + len(no_decay)
 
     return [dict(params=decay), dict(params=no_decay, weight_decay=0)]
 
+def mixup_data(x, y, alpha=0.2):
+
+    """Returns mixed up inputs pairs of targets and lambda"""
+    if alpha > 0:
+        lam = np.random.beta(alpha, alpha)
+    else:
+        lam = 1
+    
+    batch_size = x.size(0)
+    index = torch.randperm(batch_size)
+    index = index.to(x.device)
+
+    lam = max(lam, 1 - lam)
+
+    mixed_x = lam * x + (1 - lam) * x[index, :]
+
+    y_a = y
+    y_b = y[index, :]
+
+    return mixed_x, y_a, y_b, lam
 
 
 
