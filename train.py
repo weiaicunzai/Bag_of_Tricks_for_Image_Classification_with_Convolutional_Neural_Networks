@@ -31,7 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('-lr', type=float, default=0.01, help='initial learning rate')
     parser.add_argument('-e', type=int, default=450, help='training epoches')
     parser.add_argument('-warm', type=int, default=5, help='warm up phase')
-    parser.add_argument('-gpus', nargs='+', default=0, help='gpu device')
+    parser.add_argument('-gpus', nargs='+', type=int, default=0, help='gpu device')
     args = parser.parse_args()
 
     #checkpoint directory
@@ -53,6 +53,7 @@ if __name__ == '__main__':
         transforms.RandomResizedCrop(settings.IMAGE_SIZE),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=0.4, saturation=0.4, hue=0.4),
+        transforms.RandomErasing(),
         transforms.ToTensor(),
         transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD)
     ])
