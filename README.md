@@ -22,9 +22,9 @@ switch to AlexNet, to see how powerful these tricks are.
 
 ## tricks
 
-tricks I've tested, some of them were from the Paper[Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/abs/1812.01187):
+tricks I've tested, some of them were from the Paper [Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/abs/1812.01187) :
 
-|trick|refereced paper|
+|trick|referenced paper|
 |:---:|:---:|
 |xavier init|[Understanding the difficulty of training deep feedforward neural networks](http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf)|
 |warmup training|[Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677v2)|
@@ -37,7 +37,7 @@ tricks I've tested, some of them were from the Paper[Bag of Tricks for Image Cla
 
 baseline(training from sctrach, no ImageNet pretrain weights are used): 
 
-vgg16 64.60% on cub200_2011 dataset, lr=0.01, batchsize=64
+vgg16 64.60% on [CUB_200_2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) dataset, lr=0.01, batchsize=64
 
 effects of stacking tricks 
 
