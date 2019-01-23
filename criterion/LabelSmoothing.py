@@ -71,7 +71,6 @@ class LSR(nn.Module):
 
 
         smoothed_target = self._smooth_label(target, x.size(1), self.e)
-        print(smoothed_target[44])
         x = self.log_softmax(x)
         loss = torch.sum(- x * smoothed_target, dim=1)
 

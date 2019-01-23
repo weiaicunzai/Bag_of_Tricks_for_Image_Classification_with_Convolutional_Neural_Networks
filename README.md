@@ -7,7 +7,7 @@ I will use CUB_200_2011 dataset instead of ImageNet, vgg network instead of resn
 to verify if the tricks were introduced in the Paper would work on other dataset and network
 
 
-baseline: 
+baseline(training from sctrach): 
 
 vgg16 64.60% on cub200_2011 dataset, lr=0.1, batchsize=64
 
@@ -20,4 +20,8 @@ improved acc from 64.60% to 66.07%
 +my own transform module
 
 improved acc from 66.07% to 70.14%
+
++label smoothing
+
+improved acc from 70.14% to 71.20%
 

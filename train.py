@@ -78,20 +78,20 @@ if __name__ == '__main__':
         args.w
     )
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+    #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
     net = get_network(args)
     net = init_weights(net)
-    net.to(device)
 
     
-    if not isinstance(args.gpus, int):
-        net = nn.DataParallel(net, device_ids=args.gpus)
+    if isinstance(args.gpus, int):
+        args.gpus = [args.gpus]
+    
+    net = nn.DataParallel(net, device_ids=args.gpus)
 
     #visualize the network
     visualize_network(writer, net)
 
     cross_entropy = nn.CrossEntropyLoss() 
-    #loss_function = LSR()
     lsr_loss = LSR()
 
     #apply no weight decay on bias
@@ -118,8 +118,10 @@ if __name__ == '__main__':
             if epoch <= args.warm:
                 warmup_scheduler.step()
 
-            images = images.to(device)
-            labels = labels.to(device)
+            #images = images.to(device)
+            #labels = labels.to(device)
+            images = images.cuda(args.gpus[0])
+            labels = labels.cuda(args.gpus[0])
 
             optimizer.zero_grad()
             predicts = net(images)
@@ -148,8 +150,10 @@ if __name__ == '__main__':
         correct = 0
         for images, labels in test_dataloader:
 
-            images = images.to(device)
-            labels = labels.to(device)
+            #images = images.to(device)
+            #labels = labels.to(device)
+            images = images.cuda(args.gpus[0])
+            labels = labels.cuda(args.gpus[0])
 
             predicts = net(images)
             _, preds = predicts.max(1)
