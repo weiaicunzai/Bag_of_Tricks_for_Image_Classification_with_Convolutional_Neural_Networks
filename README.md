@@ -7,21 +7,15 @@ I will use CUB_200_2011 dataset instead of ImageNet, vgg network instead of resn
 to verify if the tricks were introduced in the Paper would work on other dataset and network
 
 
-baseline(training from sctrach): 
+baseline(training from sctrach, no ImageNet pretrain weights are used): 
 
-vgg16 64.60% on cub200_2011 dataset, lr=0.1, batchsize=64
+vgg16 64.60% on cub200_2011 dataset, lr=0.01, batchsize=64
 
-+xavier init 
-+warmup training:
+effective of stacking tricks 
 
-improved acc from 64.60% to 66.07%
-
-+no weight decay
-+my own transform module
-
-improved acc from 66.07% to 70.14%
-
-+label smoothing
-
-improved acc from 70.14% to 71.20%
-
+|trick|acc|
+|:---:|:---:|
+|baseline|64.60%|
+|xavier init,warmup training|66.07%|
+|no weight decay|70.14%|
+|label smoothing|71.20%|
