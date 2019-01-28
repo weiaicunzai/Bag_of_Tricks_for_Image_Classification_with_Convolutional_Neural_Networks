@@ -30,6 +30,7 @@ tricks I've tested, some of them were from the Paper [Bag of Tricks for Image Cl
 |warmup training|[Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677v2)|
 |no bias decay|[Highly Scalable Deep Learning Training System with Mixed-Precision: Training ImageNet in Four Minutes](https://arxiv.org/abs/1807.11205vx)|
 |label smoothing|[Rethinking the inception architecture for computer vision](https://arxiv.org/abs/1512.00567v3))|
+|random erasing|[Random Erasing Data Augmentation](https://arxiv.org/abs/1708.04896v2)|
 
 **and more to come......**
 
@@ -47,3 +48,4 @@ effects of stacking tricks
 |+xavier init and warmup training|66.07%|
 |+no bias decay|70.14%|
 |+label smoothing|71.20%|
+|+random erasing|does not work, drops about 4 points|

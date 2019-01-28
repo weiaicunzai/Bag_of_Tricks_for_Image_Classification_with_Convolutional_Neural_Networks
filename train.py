@@ -27,9 +27,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-net', type=str, required=True, help='net type')
     parser.add_argument('-w', type=int, default=4, help='number of workers for dataloader')
-    parser.add_argument('-b', type=int, default=64, help='batch size for dataloader')
-    parser.add_argument('-lr', type=float, default=0.01, help='initial learning rate')
-    parser.add_argument('-e', type=int, default=450, help='training epoches')
+    parser.add_argument('-b', type=int, default=256, help='batch size for dataloader')
+    parser.add_argument('-lr', type=float, default=0.1, help='initial learning rate')
+    parser.add_argument('-e', type=int, default=120, help='training epoches')
     parser.add_argument('-warm', type=int, default=5, help='warm up phase')
     parser.add_argument('-gpus', nargs='+', type=int, default=0, help='gpu device')
     args = parser.parse_args()
@@ -88,9 +88,10 @@ if __name__ == '__main__':
         args.gpus = [args.gpus]
     
     net = nn.DataParallel(net, device_ids=args.gpus)
+    net = net.cuda()
 
     #visualize the network
-    visualize_network(writer, net)
+    visualize_network(writer, net.module)
 
     cross_entropy = nn.CrossEntropyLoss() 
     lsr_loss = LSR()
@@ -107,7 +108,7 @@ if __name__ == '__main__':
     train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
     #train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.e - args.warm)
 
-    best_acc = 0.0
+    #best_acc = 0.0
     for epoch in range(1, args.e + 1):
         if epoch > args.warm:
             train_scheduler.step(epoch)
@@ -119,10 +120,8 @@ if __name__ == '__main__':
             if epoch <= args.warm:
                 warmup_scheduler.step()
 
-            #images = images.to(device)
-            #labels = labels.to(device)
-            images = images.cuda(args.gpus[0])
-            labels = labels.cuda(args.gpus[0])
+            images = images.cuda()
+            labels = labels.cuda()
 
             optimizer.zero_grad()
             predicts = net(images)
@@ -151,10 +150,8 @@ if __name__ == '__main__':
         correct = 0
         for images, labels in test_dataloader:
 
-            #images = images.to(device)
-            #labels = labels.to(device)
-            images = images.cuda(args.gpus[0])
-            labels = labels.cuda(args.gpus[0])
+            images = images.cuda()
+            labels = labels.cuda()
 
             predicts = net(images)
             _, preds = predicts.max(1)
