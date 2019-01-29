@@ -371,3 +371,35 @@ class RandomErasing:
                     img[ye : ye + He, xe : xe + We, :] = np.random.randint(low=0, high=255, size=(He, We, img.shape[2]))
 
                     return img
+
+class CutOut:
+    """Randomly mask out one or more patches from an image. An image
+    is a opencv format image(h,w,c numpy array)
+
+    Args:
+        n_holes (int): Number of patches to cut out of each image.
+        length (int): The length (in pixels) of each square patch.
+    """
+
+    def __init__(self, length, n_holes=1):
+        self.n_holes = n_holes
+        self.length = length
+    
+    def __call__(self, img):
+
+
+        while self.n_holes:
+
+            y = random.randint(0, img.shape[0] - 1)
+            x = random.randint(0, img.shape[1] - 1)
+
+            tl_x = int(max(0, x - self.length / 2))
+            tl_y = int(max(0, y - self.length / 2))
+
+            img[tl_y : tl_y + self.length, tl_x : tl_x + self.length, :] = 0
+
+            self.n_holes -= 1
+        
+        return img
+
+

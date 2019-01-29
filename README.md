@@ -31,6 +31,7 @@ tricks I've tested, some of them were from the Paper [Bag of Tricks for Image Cl
 |no bias decay|[Highly Scalable Deep Learning Training System with Mixed-Precision: Training ImageNet in Four Minutes](https://arxiv.org/abs/1807.11205vx)|
 |label smoothing|[Rethinking the inception architecture for computer vision](https://arxiv.org/abs/1512.00567v3))|
 |random erasing|[Random Erasing Data Augmentation](https://arxiv.org/abs/1708.04896v2)|
+|cutout|[Improved Regularization of Convolutional Neural Networks with Cutout](https://arxiv.org/abs/1708.04552v2)|
 
 **and more to come......**
 
