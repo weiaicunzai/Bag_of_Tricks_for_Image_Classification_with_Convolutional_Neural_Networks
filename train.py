@@ -26,10 +26,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-net', type=str, required=True, help='net type')
-    parser.add_argument('-w', type=int, default=4, help='number of workers for dataloader')
+    parser.add_argument('-w', type=int, default=2, help='number of workers for dataloader')
     parser.add_argument('-b', type=int, default=256, help='batch size for dataloader')
-    parser.add_argument('-lr', type=float, default=0.1, help='initial learning rate')
-    parser.add_argument('-e', type=int, default=120, help='training epoches')
+    parser.add_argument('-lr', type=float, default=0.04, help='initial learning rate')
+    parser.add_argument('-e', type=int, default=450, help='training epoches')
     parser.add_argument('-warm', type=int, default=5, help='warm up phase')
     parser.add_argument('-gpus', nargs='+', type=int, default=0, help='gpu device')
     args = parser.parse_args()
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         transforms.RandomResizedCrop(settings.IMAGE_SIZE),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=0.4, saturation=0.4, hue=0.4),
-        transforms.RandomErasing(),
+        #transforms.RandomErasing(),
         transforms.ToTensor(),
         transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD)
     ])
