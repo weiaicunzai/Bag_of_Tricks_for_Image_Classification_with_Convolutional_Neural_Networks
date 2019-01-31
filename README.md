@@ -32,7 +32,7 @@ tricks I've tested, some of them were from the Paper [Bag of Tricks for Image Cl
 |label smoothing|[Rethinking the inception architecture for computer vision](https://arxiv.org/abs/1512.00567v3))|
 |random erasing|[Random Erasing Data Augmentation](https://arxiv.org/abs/1708.04896v2)|
 |cutout|[Improved Regularization of Convolutional Neural Networks with Cutout](https://arxiv.org/abs/1708.04552v2)|
-
+|linear scaling learning rate|[Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677v2)|
 **and more to come......**
 
 ## result
@@ -50,3 +50,4 @@ effects of stacking tricks
 |+no bias decay|70.14%|
 |+label smoothing|71.20%|
 |+random erasing|does not work, drops about 4 points|
+|+linear scaling learning rate|71.21%|

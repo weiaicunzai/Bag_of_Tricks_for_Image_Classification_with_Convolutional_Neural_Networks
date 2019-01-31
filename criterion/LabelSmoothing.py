@@ -86,33 +86,3 @@ class LSR(nn.Module):
         else:
             raise ValueError('unrecognized option, expect reduction to be one of none, mean, sum')
 
-#lsr = LSR()
-#
-#a = torch.Tensor(64, 7).fill_(0.1 / 7)
-#a[0][1] = 0.9 + 0.1 / 7
-#a[1][1] = 0.9 + 0.1 / 7
-#a[2][3] = 0.9 + 0.1 / 7
-#a[3][0] = 0.9 + 0.1 / 7
-#print(a.size())
-#
-#target = torch.LongTensor([1, 3] * 32)
-#print(target.size())
-#
-##lsr = nn.CrossEntropyLoss(reduction='mean')
-#
-#
-#r = lsr(a, target)
-#
-#print(r)
-#
-
-x = torch.Tensor(64, 200).fill_(0.1 / 200)
-
-target = torch.LongTensor([1,3-1,4,5, 2,8,56,22] * 8)
-
-lsr = LSR()
-
-
-r = lsr(x, target)
-
-print(r)
