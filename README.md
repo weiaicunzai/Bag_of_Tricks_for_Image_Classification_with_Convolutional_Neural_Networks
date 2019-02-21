@@ -7,6 +7,9 @@ I would test popular training tricks as many as I can for improving image classi
 free to leave a comment about the tricks you want me to test(please write the referenced paper along with
 the tricks)
 
+## hardware
+Using 4 Tesla P40 to run the experiments
+
 ## dataset
 
 I will use [CUB_200_2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) dataset instead of ImageNet,
@@ -33,7 +36,10 @@ tricks I've tested, some of them were from the Paper [Bag of Tricks for Image Cl
 |random erasing|[Random Erasing Data Augmentation](https://arxiv.org/abs/1708.04896v2)|
 |cutout|[Improved Regularization of Convolutional Neural Networks with Cutout](https://arxiv.org/abs/1708.04552v2)|
 |linear scaling learning rate|[Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677v2)|
+|cosine learning rate decay|[SGDR: Stochastic Gradient Descent with Warm Restarts](https://arxiv.org/abs/1608.03983)|
+
 **and more to come......**
+
 
 ## result
 
@@ -50,4 +56,6 @@ effects of stacking tricks
 |+no bias decay|70.14%|
 |+label smoothing|71.20%|
 |+random erasing|does not work, drops about 4 points|
-|+linear scaling learning rate|71.21%|
+|+linear scaling learning rate(batchsize 256, lr 0.04)|71.21%|
+|+cutout|does not work, drops about 1 point|
+|+cosine learning rate decay|does not work, drops about 1 point|
