@@ -54,6 +54,7 @@ if __name__ == '__main__':
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=0.4, saturation=0.4, hue=0.4),
         #transforms.RandomErasing(),
+        transforms.CutOut(56),
         transforms.ToTensor(),
         transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD)
     ])
@@ -108,7 +109,7 @@ if __name__ == '__main__':
     train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=settings.MILESTONES)
     #train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.e - args.warm)
 
-    #best_acc = 0.0
+    best_acc = 0.0
     for epoch in range(1, args.e + 1):
         if epoch > args.warm:
             train_scheduler.step(epoch)
