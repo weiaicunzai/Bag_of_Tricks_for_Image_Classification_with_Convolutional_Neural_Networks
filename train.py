@@ -7,7 +7,6 @@ import argparse
 import glob
 import os
 
-import cv2
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -54,7 +53,7 @@ if __name__ == '__main__':
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(brightness=0.4, saturation=0.4, hue=0.4),
         #transforms.RandomErasing(),
-        transforms.CutOut(56),
+        #transforms.CutOut(56),
         transforms.ToTensor(),
         transforms.Normalize(settings.TRAIN_MEAN, settings.TRAIN_STD)
     ])
