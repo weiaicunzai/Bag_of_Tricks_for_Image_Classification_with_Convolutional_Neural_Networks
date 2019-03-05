@@ -93,7 +93,7 @@ if __name__ == '__main__':
     #visualize the network
     visualize_network(writer, net.module)
 
-    cross_entropy = nn.CrossEntropyLoss() 
+    #cross_entropy = nn.CrossEntropyLoss() 
     lsr_loss = LSR()
 
     #apply no weight decay on bias
@@ -157,7 +157,7 @@ if __name__ == '__main__':
             _, preds = predicts.max(1)
             correct += preds.eq(labels).sum().float()
 
-            loss = cross_entropy(predicts, labels)
+            loss = lsr_loss(predicts, labels)
             total_loss += loss.item()
 
         test_loss = total_loss / len(test_dataloader)
